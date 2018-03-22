@@ -1,3 +1,7 @@
+import morphologging
+logger = morphologging.getLogger(__name__)
+
+
 from scipy.cluster.vq import vq, kmeans, kmeans2, whiten
 import numpy as np
 
@@ -36,7 +40,7 @@ def buildAndCompare(features, k, listItem, trainingProportion=0.5):
     '''
     Split the data in a training set and a testing set, train on the training set and extract the errors from the testing one.
     '''
-    logger.info("Clustering in split set")
+    # logger.info("Clustering in split set")
     dataArray = _prepareDataset(features,listItem)
     whitenedDataArray = whiten(dataArray)
     trainingSet, analysisSet = splitDataset(whitenedDataArray,trainingProportion,True)

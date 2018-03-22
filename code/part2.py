@@ -47,7 +47,7 @@ listNumberCluster = []
 listDistortionsTraining = []
 listDistortionsAnalysis = []
 for i in range(1,20):   
-    print(i)
+    logger.debug("{}/{}".format(i,20))
     listDistortionsTrainingTemp = [] 
     listDistortionsAnalysisTemp = [] 
     for j in range(0,500):
