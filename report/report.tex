@@ -37,9 +37,17 @@
 
 \section{Introduction}
 
+Meteorological data such as the atmospherical pressure, the relative humidity and the temperature have been provided over several days.
+The goal of this study is to extract relationships between these variables.
+
+NetCDF4 files containing the data collected over a day have been given.
+The first part of the assignment consists in reducing the amount of data and especially removing the statistical fluctuations in the data that don't bing any useful piece of informations.
+A second part aims at finding clusters in the parameters space corresponding to locations where the parameters share similar behaviors.
+
 \section{Part 1: Data averaging}
 \subsection{Time series}
 
+Figure \ref{fig:ts-data} shows the data time series as extracted from the files.
 \begin{figure}
     \includegraphics[width=0.45\textwidth]{../plots/temp_mean.pdf}
     \includegraphics[width=0.45\textwidth]{../plots/qc_temp_mean.pdf}
@@ -47,8 +55,10 @@
     \includegraphics[width=0.45\textwidth]{../plots/qc_atmos_pressure.pdf}
     \includegraphics[width=0.45\textwidth]{../plots/rh_mean.pdf}
     \includegraphics[width=0.45\textwidth]{../plots/qc_rh_mean.pdf}
-    \caption{Time series of the mean temperature, mean relative humidity and atmospheric pressure (left) and the associated quality check value (right) as a function of time.}
+    \caption{\label{fig:ts-data}Time series of the mean temperature, mean relative humidity and atmospheric pressure (left) and the associated quality check value (right) as a function of time.}
 \end{figure}
+We have 5 days of data, with datapoints each 60 seconds.
+We verify that the data quality checks are good for all of these data.
 %\begin{figure}
 %    \caption{Time series of the quality checks for mean temperature, mean relative humidity and atmospheric pressure as a function of time.}
 %\end{figure}
@@ -58,25 +68,30 @@ Each day has its own time stamp (number of seconds since midnight) and a hardcod
 
 \subsection{Estimating the optimal average period}
 
-Using an Allan representation of the data, I can estimate what the typical period where the measurements fluctuations are Gaussian is.
-It seems that the value at which non Gaussian fluctuations appear is defined for all three variables to be about 60 samples.
-For safety, I will use 50 samples for averaging.
+In the assignment a data averaging over 5 minutes (5 points) is requested.
+This aims at reducing the measurements fluctuations which are not bringing informations to the analysis (a.k.a. white noise fluctuations).
 
+We can try to estimate the optimal value for such averaging.
+Using an Allan representation of the data, I can estimate what the typical period where the measurements fluctuations are Gaussian is.
+Figure \ref{fig:asd} shows the Allan Standard Deviation as a function of the averaging period.
 \begin{figure}
 \includegraphics[width=0.6\textwidth]{../plots/asd_temp_mean.pdf}
 \includegraphics[width=0.6\textwidth]{../plots/asd_rh_mean.pdf}
 \includegraphics[width=0.6\textwidth]{../plots/asd_atmos_pressure.pdf}
-\caption{Allan Standard Deviation of the mean temperature, mean relative humidity and atmospheric pressure as a function of the period (in number of samples).}
+\caption{\label{fig:asd}Allan Standard Deviation of the mean temperature, mean relative humidity and atmospheric pressure as a function of the period (in number of samples).}
 \end{figure}
+For short averaging period, the deviation decreases as the fluctuations are purely white.
+At some point, the deviation stops decreasing: this can be interpreted as this is the typical moment at which fluctuations are not Gaussian anymore.
+The corresponding averaging period would then be the optimal averaging period.
+It seems that the value at which non Gaussian fluctuations appear is defined for all three variables to be about 50 samples.
+{\tgf Implement an algorithmic way to extract from the Allan Standard Deviation the number of measurements to average (something like a minimum finder).}
 
-{\tgf Implement an algorithmic way to extract the right number of measurements to average (something like a minimum finder).}
-
-The averaged data (represented on Figure \ref{}) are then saved in a CDF file.
+The averaged data (represented on Figure \ref{fig:ts-avg}) are then saved in a CDF file named sgpmetavgE13.b1.20180101.000000.cdf.
 \begin{figure}
     \includegraphics[width=0.6\textwidth]{../plots/avg_temp_mean.pdf}
     \includegraphics[width=0.6\textwidth]{../plots/avg_atmos_pressure.pdf}
     \includegraphics[width=0.6\textwidth]{../plots/avg_rh_mean.pdf}
-    \caption{Time series of the average of mean temperature, mean relative humidity and atmospheric pressure as a function of time.}
+    \caption{\label{fig:ts-avg}Time series of the average of mean temperature, mean relative humidity and atmospheric pressure as a function of time.}
 \end{figure}
 
 \section{Part 2: Clustering of data}
@@ -88,20 +103,45 @@ The clusters locations are determined using a $k$-means clustering algorithm tha
 Given a number of cluster to find and a initial guess of the clusters centers, it first assigns all the data points to a cluster by determining the closest cluster center to each datapoint.
 Then it calculates the average position of the obtained cluster.
 
-Here I have used the scipy clustering package\footnote{\href{https://docs.scipy.org/doc/scipy/reference/cluster.vq.html}{Scipy clustering package}}.
-Figure \ref{} shows the distance between the datapoints and each cluster center for various numbers of clusters.
-
+Here I have used the Scipy clustering package\footnote{\href{https://docs.scipy.org/doc/scipy/reference/cluster.vq.html}{Scipy clustering package}}.
+Figure \ref{fig:distance_to_centroids} shows the distance between the datapoints and each cluster center for various numbers of clusters. 
 \begin{figure}
-    \includegraphics[width=0.45\textwidth]{../plots/distance_to_centroids_vs_number_of_clusters_training.pdf}
-    \includegraphics[width=0.45\textwidth]{../plots/distance_to_centroids_vs_number_of_clusters_analysis.pdf}
-    \caption{Distance to the cluster centers as a function of the number of clusters: the plot on the right corresponds to the training dataset and the right to the testing dataset.}
+    \includegraphics[width=0.45\textwidth]{../plots/distance_to_centroids_vs_number_of_clusters.pdf}
+    \caption{\label{fig:distance_to_centroids} Distance to the cluster centers as a function of the number of clusters for the entire dataset.}
 \end{figure}
-
-
-
 
 \subsection{Determination of the optimal number of clusters} 
 
+If the number of clusters we assume exists is too large, we encounter a over-fitting (or over-interpretation) issue, where statistical fluctuations are interpreted as characteristics that actually don't exist.
+The optimization of the number of clusters consists in determining the transition location when overfitting happens.
+
+The derivative of the average temperature is calculated and used in this study.
+We divide the dataset in two subsets: 90 \% goes as training dataset and the rest as testing set.
+A shuffling of the data is done, so the time correlations can be ignored.
+We then determine the clusters locations using the training set and we estimate the distance between the testing set data and the clusters centers.
+For several numbers of clusters, we repeat this procedure and extract the average distance.
+Figure \ref{fig:distance_to_centroids2} shows the results of this approach.
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{../plots/distance_to_centroids_vs_number_of_clusters_training_5.pdf}
+    \includegraphics[width=0.45\textwidth]{../plots/distance_to_centroids_vs_number_of_clusters_analysis_5.pdf}
+    \caption{\label{fig:distance_to_centroids2} Distance to the cluster centers as a function of the number of clusters for a 5 minutes averaging: the plot on the right corresponds to the training dataset and the right to the testing dataset.}
+\end{figure}
+We can see that, as we can expect, the more cluster the better the algorithm is performing on the training set.
+A similar behavior is observed for the testing data, but the distances are generally larger for this set.
+
+The best value for the number of clusters could be when the improvement rate of the algorithm in classifying the data decreases because it starts to explain statistical fluctuations by using clusters.
+On the figure \ref{fig:distance_to_centroids2}, this corresponds to a change in the slope of the distance to centroids.
+On the training set, this phenomenon appears around $k=6$.
+A similar inflection point appears for the testing set around $k=6$: it seems that the 
+
+As a comparison, the figure \ref{fig:distance_to_centroids3} shows the distance to the cluster centers as a function of the number of cluster, but for an averaging of the data of 50 minutes (instead of 5, as requested by the assignement).
+The same conclusions can be drawn.
+However a difference in the absolute values of these distances is observed, this would required some investigations to understand what is causing this.
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{../plots/distance_to_centroids_vs_number_of_clusters_training.pdf}
+    \includegraphics[width=0.45\textwidth]{../plots/distance_to_centroids_vs_number_of_clusters_analysis.pdf}
+    \caption{\label{fig:distance_to_centroids3} Distance to the cluster centers as a function of the number of clusters for a 50 minutes averaging: the plot on the right corresponds to the training dataset and the right to the testing dataset.}
+\end{figure}
 
 
 \end{document}  

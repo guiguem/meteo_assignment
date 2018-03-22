@@ -28,6 +28,7 @@ def averageData(x,nAverage):
     return avArray.tolist()
 
 def addDerivatives(dataset,listName, timeName=None):
+    logger.info("Add derivatives")
     if timeName is not None:
         times = dataset.get(timeName)
     else:

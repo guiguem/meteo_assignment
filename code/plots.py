@@ -18,6 +18,7 @@ def plot(y,x=None,title="plot", save=True):
         plt.savefig('../plots/{}.pdf'.format(title))
 
 def clusterPlot(whitened,book, iX, iY, title="boxPlots", save=True):
+    logger.info("cluster plotting {}".format(title))
     plt.figure(1)
     plt.gcf().clear()
     plt.gcf().clear()
