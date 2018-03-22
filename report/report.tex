@@ -72,12 +72,12 @@ In the assignment a data averaging over 5 minutes (5 points) is requested.
 This aims at reducing the measurements fluctuations which are not bringing informations to the analysis (a.k.a. white noise fluctuations).
 
 We can try to estimate the optimal value for such averaging.
-Using an Allan representation of the data, I can estimate what the typical period where the measurements fluctuations are Gaussian is.
+Using an Allan\footnote{\href{https://en.wikipedia.org/wiki/Allan_variance}{Allan Variance wiki page}} representation of the data, I can estimate what the typical period where the measurements fluctuations are Gaussian is.
 Figure \ref{fig:asd} shows the Allan Standard Deviation as a function of the averaging period.
 \begin{figure}
-\includegraphics[width=0.6\textwidth]{../plots/asd_temp_mean.pdf}
-\includegraphics[width=0.6\textwidth]{../plots/asd_rh_mean.pdf}
-\includegraphics[width=0.6\textwidth]{../plots/asd_atmos_pressure.pdf}
+\includegraphics[width=0.45\textwidth]{../plots/asd_temp_mean.pdf}
+\includegraphics[width=0.45\textwidth]{../plots/asd_rh_mean.pdf}
+\includegraphics[width=0.45\textwidth]{../plots/asd_atmos_pressure.pdf}
 \caption{\label{fig:asd}Allan Standard Deviation of the mean temperature, mean relative humidity and atmospheric pressure as a function of the period (in number of samples).}
 \end{figure}
 For short averaging period, the deviation decreases as the fluctuations are purely white.
@@ -88,9 +88,9 @@ It seems that the value at which non Gaussian fluctuations appear is defined for
 
 The averaged data (represented on Figure \ref{fig:ts-avg}) are then saved in a CDF file named sgpmetavgE13.b1.20180101.000000.cdf.
 \begin{figure}
-    \includegraphics[width=0.6\textwidth]{../plots/avg_temp_mean.pdf}
-    \includegraphics[width=0.6\textwidth]{../plots/avg_atmos_pressure.pdf}
-    \includegraphics[width=0.6\textwidth]{../plots/avg_rh_mean.pdf}
+    \includegraphics[width=0.45\textwidth]{../plots/avg_temp_mean.pdf}
+    \includegraphics[width=0.45\textwidth]{../plots/avg_atmos_pressure.pdf}
+    \includegraphics[width=0.45\textwidth]{../plots/avg_rh_mean.pdf}
     \caption{\label{fig:ts-avg}Time series of the average of mean temperature, mean relative humidity and atmospheric pressure as a function of time.}
 \end{figure}
 
@@ -132,9 +132,10 @@ A similar behavior is observed for the testing data, but the distances are gener
 The best value for the number of clusters could be when the improvement rate of the algorithm in classifying the data decreases because it starts to explain statistical fluctuations by using clusters.
 On the figure \ref{fig:distance_to_centroids2}, this corresponds to a change in the slope of the distance to centroids.
 On the training set, this phenomenon appears around $k=6$.
-A similar inflection point appears for the testing set around $k=6$: it seems that the 
+A similar inflection point appears for the testing set around $k=6$.
+The optimal number of clusters seems to be about 6.
 
-As a comparison, the figure \ref{fig:distance_to_centroids3} shows the distance to the cluster centers as a function of the number of cluster, but for an averaging of the data of 50 minutes (instead of 5, as requested by the assignement).
+As a comparison, the figure \ref{fig:distance_to_centroids3} shows the distance to the cluster centers as a function of the number of cluster, but for an averaging of the data of 50 minutes (instead of 5, as requested by the assignment).
 The same conclusions can be drawn.
 However a difference in the absolute values of these distances is observed, this would required some investigations to understand what is causing this.
 \begin{figure}
@@ -142,6 +143,18 @@ However a difference in the absolute values of these distances is observed, this
     \includegraphics[width=0.45\textwidth]{../plots/distance_to_centroids_vs_number_of_clusters_analysis.pdf}
     \caption{\label{fig:distance_to_centroids3} Distance to the cluster centers as a function of the number of clusters for a 50 minutes averaging: the plot on the right corresponds to the training dataset and the right to the testing dataset.}
 \end{figure}
+
+Figure \ref{fig:2dplots} shows the 2D representations of the data with the centroids location using $k=6$.
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{../plots/0_1.pdf}
+    \includegraphics[width=0.45\textwidth]{../plots/0_2.pdf}
+    \includegraphics[width=0.45\textwidth]{../plots/0_3.pdf}
+    \includegraphics[width=0.45\textwidth]{../plots/1_2.pdf}
+    \includegraphics[width=0.45\textwidth]{../plots/1_3.pdf}
+    \includegraphics[width=0.45\textwidth]{../plots/2_3.pdf}
+    \caption{\label{fig:2dplots} Data (blue) and 6 centroids (red) obtained by the $k$-means algorithm.}
+\end{figure}
+We can see that the locations of the centroids make sense, especially on some plots.
 
 
 \end{document}  
