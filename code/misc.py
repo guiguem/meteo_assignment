@@ -26,8 +26,17 @@ def averageData(x,nAverage):
         return np.mean(arr[:end].reshape(-1, n), 1)
     avArray = average(array, nAverage)
     return avArray.tolist()
-        
 
-    # import matplotlib.pyplot as plt
-    # plt.figure(1)
+def addDerivatives(dataset,listName, timeName=None):
+    if timeName is not None:
+        times = dataset.get(timeName)
+    else:
+        times = [i for i in range(len(dataset.get(listName[0])))]
+    for a_var in listName:
+        values = dataset.get(a_var)
+        derivatives = [(values[i+1] - values[i])/(times[i+1]-times[i]) for i in range(len(values)-1)]
+        dataset.update({"der_{}".format(a_var): derivatives})
+    return dataset
+
+
 

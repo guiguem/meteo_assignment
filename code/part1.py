@@ -2,7 +2,7 @@ import morphologging
 logger = morphologging.getLogger(__name__)
 
 from IO import extractData, saveDictionaryIntoFile
-from averaging import plotASD, averageData
+from misc import plotASD, averageData
 from plots import plot
 
 from os import listdir
